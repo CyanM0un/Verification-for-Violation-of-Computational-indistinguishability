@@ -1,27 +1,29 @@
-function Experiment1(n,times)
+function Experiment1(n,times)  % n actually means "2n"
 
 accuracy = [];
-domain = [-2^2:2^2];
-domain_len = length(domain(:));
+r = 10;
+m = 10;
+Q = [-2^r:2^r];
 O = zeros(n/2,n/2);
 I = eye(n/2);
 
-for t=1:times
-    sw = (rand(n/2,n/2)-0.5)*8;
-    result = [sw O;O I];
-    Y = [1:n-1];
-    ai = n;
-    P_index = [];
+for t = 1:times
+    Sw = (rand(n/2,n/2)-0.5)*2^(r+m);
+    result = [Sw O;O I];
+
+    Y = [1:n-1];  % Elementary Matrix Generation from Outsourcing LDA Based
+    ai = n;       % Face Recognition to an Untrusted Cloud, here we just collect
+    P_index = []; % the position of each Pi in P_index for effiency
     flag = true;
-    for i=1:n
+    for i = 1:n
         bi = i;
-        pi = domain(ceil(rand*domain_len));
+        pi = Q(ceil(rand * (length(Q(:)) - 2)) + 1);
         p_cell(i) = pi;
         if (ismember(bi,Y))
             Y = Y(~ismember(Y,bi));
             deleFlag = true;
         end
-        if (i>1)
+        if (i > 1)
             ai = Y(ceil(rand*length(Y(:))));
         end
         Y = Y(~ismember(Y,ai));
@@ -31,10 +33,12 @@ for t=1:times
         end
         P_index(i) = ai;
     end
+    
     for i=1:n
         result(n-i+1,:) = result(n-i+1,:) + result(P_index(n-i+1),:)*p_cell(n-i+1);
         result(:,P_index(n-i+1)) = result(:,P_index(n-i+1)) + result(:,n-i+1)*-p_cell(n-i+1);
     end
+
     test_target = P_index(n/2+1:end);
     for i = 1 : n/2
         if (test_target(i) > n/2)
@@ -46,8 +50,10 @@ for t=1:times
             end
         end    
     end
+
     disp(P_index);
     disp(result);
+
     if (flag)
         accuracy = [accuracy 1];
     end
@@ -55,5 +61,6 @@ end
 
 disp('accuracy:')
 disp(sum(accuracy)/times);
+
 end
 
